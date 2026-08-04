@@ -1,6 +1,15 @@
 # Isfahan Urban Expansion Mapping with Landsat and Machine Learning
 
-A reproducible remote-sensing workflow for mapping urban expansion in Isfahan, Iran, between 1985 and 2024 using Landsat imagery, NDVI, NDBI, Support Vector Machine (SVM), Random Forest, and post-classification change detection.
+A documented remote-sensing workflow for mapping land-cover change and urban expansion in Isfahan, Iran, between 1985 and 2024.
+
+`Python` · `Google Earth Engine` · `Landsat` · `NDVI/NDBI` · `SVM` · `Random Forest` · `Rasterio` · `GeoPandas`
+
+## Key results
+
+- Built-up area increased by **599.51 km²** between 1985 and 2024.
+- SVM reached **97.4% overall accuracy** in 1985 and **95.9%** in 2024.
+- Approximately **379 km²** changed from vegetation to built-up land.
+- Approximately **324 km²** changed from bare land to built-up land.
 
 ![Study area](images/study_area_map.png)
 
@@ -8,14 +17,29 @@ A reproducible remote-sensing workflow for mapping urban expansion in Isfahan, I
 
 This project examines long-term land-cover change across the Isfahan metropolitan area using:
 
-- Landsat 5 TM imagery for 1985
-- Landsat 9 OLI-2 imagery for 2024
+- Landsat 5 TM imagery acquired on **2 August 1985**
+- Landsat 9 OLI-2 imagery acquired on **5 August 2024**
 - Six surface-reflectance bands plus NDVI and NDBI
 - Three land-cover classes: Built-up, Vegetation, and Bare land
-- SVM and Random Forest classification
-- Pixel-based post-classification comparison
+- Support Vector Machine and Random Forest classification
+- Pixel-based post-classification change detection
 
 The workflow was developed as part of the **Earth Observation Advanced** course at Politecnico di Milano.
+
+## Input imagery
+
+| Year | Sensor | Acquisition date | Cloud cover |
+|---:|---|---|---:|
+| 1985 | Landsat 5 TM | 1985-08-02 | 0% |
+| 2024 | Landsat 9 OLI-2 | 2024-08-05 | 6.33% |
+
+The Google Earth Engine script prints the selected Landsat product ID, acquisition date, cloud cover, and output band order to the Console.
+
+Each exported raster contains eight bands in this order:
+
+```text
+Blue, Green, Red, NIR, SWIR1, SWIR2, NDVI, NDBI
+```
 
 ## Objectives
 
@@ -27,16 +51,17 @@ The workflow was developed as part of the **Earth Observation Advanced** course 
 
 ## Workflow
 
-1. Select and preprocess Landsat imagery in Google Earth Engine.
-2. Apply reflectance scaling and calculate NDVI and NDBI.
-3. Prepare reference polygons for three land-cover classes.
-4. Extract mean spectral and index values for each polygon.
-5. Split the reference dataset into training and validation subsets.
-6. Train and evaluate Random Forest and RBF-kernel SVM models.
-7. Apply the selected SVM model to the full raster.
-8. Compare the 1985 and 2024 classified rasters pixel by pixel.
-9. Calculate area change and transition matrices.
-10. Produce maps, charts, and a transition heatmap.
+1. Select Landsat scenes in Google Earth Engine.
+2. Apply surface-reflectance scaling.
+3. Calculate NDVI and NDBI.
+4. Prepare reference polygons for three land-cover classes.
+5. Extract mean spectral and index values for each polygon.
+6. Split the reference dataset into training and validation subsets.
+7. Train and evaluate Random Forest and RBF-kernel SVM models.
+8. Apply the selected SVM model to the full raster.
+9. Compare the 1985 and 2024 classified rasters pixel by pixel.
+10. Calculate area change and transition matrices.
+11. Produce maps, charts, and a transition heatmap.
 
 ## Land-cover classes
 
@@ -65,8 +90,6 @@ SVM achieved the highest overall accuracy in both years and was used for the fin
 | Vegetation | 1116.26 | 893.01 | -223.25 | -20.0% |
 | Bare land | 2117.48 | 1741.22 | -376.26 | -17.8% |
 
-The built-up area increased by nearly 600 km², while vegetation and bare land declined.
-
 ![Land-cover area comparison](images/land_cover_area_comparison_1985_2024.png)
 
 ## Land-cover maps
@@ -88,9 +111,9 @@ The built-up area increased by nearly 600 km², while vegetation and bare land d
 
 The largest transitions were:
 
-- Vegetation → Built-up: approximately 379 km²
-- Bare land → Built-up: approximately 324 km²
-- Bare land → Bare land: approximately 1563 km²
+- Vegetation → Built-up: approximately **379 km²**
+- Bare land → Built-up: approximately **324 km²**
+- Bare land → Bare land: approximately **1563 km²**
 
 ![Transition matrix heatmap](images/transition_matrix_heatmap_1985_2024.png)
 
@@ -137,7 +160,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Input imagery
+## Preparing the input rasters
 
 The original Landsat input rasters are larger than GitHub's normal file-size limit and are excluded through `.gitignore`.
 
@@ -147,17 +170,11 @@ Recreate them with:
 gee/landsat_preprocessing.js
 ```
 
-or place the prepared rasters in `data/imagery/` using these exact filenames:
+Alternatively, place prepared rasters in `data/imagery/` using these exact filenames:
 
 ```text
 Esfahan_L5_1985_with_NDVI_NDBI.tif
 Esfahan_L9_2024_with_NDVI_NDBI.tif
-```
-
-Each raster must contain the following eight bands in this order:
-
-```text
-Blue, Green, Red, NIR, SWIR1, SWIR2, NDVI, NDBI
 ```
 
 ## Running the classification workflow
@@ -182,7 +199,7 @@ python src/year_2024/05_train_and_evaluate_classifiers.py
 python src/year_2024/06_apply_svm_classifier.py
 ```
 
-The `01_convert_kmz_training_data.py` scripts are only needed when starting from the original class-specific KMZ reference polygons. Converted GeoJSON and CSV files are already included.
+The `01_convert_kmz_training_data.py` scripts are only required when starting from the original class-specific KMZ reference polygons. Converted GeoJSON and CSV files are already included.
 
 ## Running change detection
 
@@ -203,12 +220,12 @@ python src/change_detection/04_plot_transition_heatmap.py
 - Nine-class land-cover change raster
 - Transition matrix heatmap
 
-## Project limitations
+## Limitations
 
 - The analysis compares two dates rather than a continuous annual time series.
-- Landsat's 30 m resolution cannot resolve narrow streets or very small agricultural plots.
+- Landsat's 30 m spatial resolution cannot resolve narrow streets or very small agricultural plots.
 - Reference samples were prepared through visual interpretation and may contain positional or labeling uncertainty.
-- Seasonal variation is limited by using summer imagery for both dates.
+- Seasonal variation was reduced by using summer imagery for both dates, but the acquisition dates are not identical.
 
 ## Reports
 
