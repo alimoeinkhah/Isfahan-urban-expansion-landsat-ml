@@ -1,0 +1,9 @@
+geopandas
+joblib
+matplotlib
+numpy
+pandas
+rasterio
+rasterstats
+scikit-learn
+seaborn
