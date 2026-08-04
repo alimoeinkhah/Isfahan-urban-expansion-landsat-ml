@@ -2,3 +2,4 @@ data/imagery/*.tif
 models/**/*.pkl
 __pycache__/
 *.pyc
+.venv/
