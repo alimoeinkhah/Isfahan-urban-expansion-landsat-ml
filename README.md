@@ -235,5 +235,9 @@ python src/change_detection/04_plot_transition_heatmap.py
 ## Author
 
 **Ali Moeinkhah**  
-Politecnico di Milano  
-Earth Observation Advanced, Academic Year 2024–2025
+Geospatial and Remote Sensing Project  
+Politecnico di Milano
+
+### Project context
+
+Developed for the *Earth Observation Advanced* course, Academic Year 2024–2025.
